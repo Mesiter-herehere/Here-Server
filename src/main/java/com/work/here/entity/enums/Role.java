@@ -1,4 +1,4 @@
-package com.work.here.entity.enums;
+package com.work.here.domain.entity.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
