@@ -1,7 +1,7 @@
-package com.work.here.domain.controller;
+package com.work.here.controller;
 
-import com.work.here.domain.entity.SelfIntro;
-import com.work.here.domain.service.SelfIntroService;
+import com.work.here.entity.SelfIntro;
+import com.work.here.service.SelfIntroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

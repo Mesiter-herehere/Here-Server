@@ -1,4 +1,4 @@
-package com.work.here.domain.entity.enums;
+package com.work.here.entity.enums;
 
 
 import com.fasterxml.jackson.annotation.JsonCreator;

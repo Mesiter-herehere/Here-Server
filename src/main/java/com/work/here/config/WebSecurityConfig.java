@@ -1,4 +1,4 @@
-package com.work.here.domain.config;
+package com.work.here.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

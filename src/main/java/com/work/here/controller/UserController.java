@@ -1,8 +1,8 @@
-package com.work.here.domain.controller;
+package com.work.here.controller;
 
 
-import com.work.here.domain.entity.User;
-import com.work.here.domain.service.UserService;
+import com.work.here.entity.User;
+import com.work.here.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

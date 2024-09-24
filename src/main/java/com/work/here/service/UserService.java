@@ -1,8 +1,8 @@
-package com.work.here.domain.service;
+package com.work.here.service;
 
 
-import com.work.here.domain.entity.User;
-import com.work.here.domain.repository.UserRepository;
+import com.work.here.entity.User;
+import com.work.here.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.work.here.domain.entity;
+package com.work.here.entity;
 
 
 import jakarta.persistence.Entity;

@@ -1,7 +1,7 @@
-package com.work.here.domain.service;
+package com.work.here.service;
 
-import com.work.here.domain.entity.SelfIntro;
-import com.work.here.domain.repository.SelfIntroRepository;
+import com.work.here.entity.SelfIntro;
+import com.work.here.repository.SelfIntroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
