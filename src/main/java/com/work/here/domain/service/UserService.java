@@ -3,6 +3,7 @@ package com.work.here.domain.service;
 import com.work.here.domain.dto.UserDto;
 import com.work.here.domain.entity.User;
 import com.work.here.domain.entity.enums.Role;
+import com.work.here.domain.entity.enums.School;
 import com.work.here.domain.repository.UserRepository;
 import com.work.here.domain.util.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -28,15 +29,13 @@ public class UserService {
         }
 
         // 새로운 사용자 생성
-        User user = new User();
-        user.setEmail(userDto.getEmail());
-        user.setName(userDto.getName());
-
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-
-        // 기본 역할 설정
-        user.setRole(Role.ROLE_STUDENT);
-
+        User user = User.builder()
+                .email(userDto.getEmail())
+                .name(userDto.getName())
+                .password(passwordEncoder.encode(userDto.getPassword()))
+                .school(School.fromString(userDto.getSchool())) // school 값 설정 추가
+                .role(Role.ROLE_STUDENT) // 기본 역할 설정
+                .build();
 
         // 사용자 저장
         userRepository.save(user);

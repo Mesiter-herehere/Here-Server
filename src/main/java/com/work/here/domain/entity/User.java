@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
 import java.util.Collection;
 import java.util.List;
 import com.work.here.domain.entity.enums.Role;
@@ -25,13 +26,15 @@ public class User implements UserDetails {
     private String name;
 
     @Enumerated(EnumType.STRING)
+//    @Column(nullable = false) // nullable=false 추가
     private School school;
 
     @Column(nullable = false, length = 60)
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(nullable = false) // nullable=false 추가
+    private Role role; // role 필드가 정의되어 있는지 확인
 
     // 기본 생성자 추가
     public User() {
