@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -20,6 +21,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final CustomUserDetailsService userDetailsService;
 
     // 회원가입 처리
     public void register(UserDto userDto) {
@@ -50,6 +52,7 @@ public class UserService {
         User user = userRepository.findByEmail(userDto.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return jwtService.generateToken(user); // UserDetails 대신 User를 전달합니다.
+        // UserDetails 대신 User를 직접 전달합니다.
+        return jwtService.generateToken(user.getId(), user); // User의 ID와 User 객체를 전달
     }
 }

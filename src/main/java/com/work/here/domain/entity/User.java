@@ -26,15 +26,14 @@ public class User implements UserDetails {
     private String name;
 
     @Enumerated(EnumType.STRING)
-//    @Column(nullable = false) // nullable=false 추가
     private School school;
 
     @Column(nullable = false, length = 60)
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false) // nullable=false 추가
-    private Role role; // role 필드가 정의되어 있는지 확인
+    @Column(nullable = false)
+    private Role role;
 
     // 기본 생성자 추가
     public User() {
@@ -52,31 +51,31 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(() -> role.name()); // 권한을 반환합니다. 필요에 따라 수정 가능
+        return List.of(() -> role.name());
     }
 
     @Override
     public String getUsername() {
-        return email; // 사용자 이름은 이메일로 설정합니다.
+        return email;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // 계정 만료 여부 (true: 만료되지 않음)
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // 계정 잠금 여부 (true: 잠금되지 않음)
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // 자격 증명 만료 여부 (true: 만료되지 않음)
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return true; // 계정 활성화 여부 (true: 활성화됨)
+        return true;
     }
 }

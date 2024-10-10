@@ -3,11 +3,13 @@ package com.work.here.domain.service;
 import com.work.here.domain.entity.SelfIntro;
 import com.work.here.domain.entity.User;
 import com.work.here.domain.dto.SelfIntroDto;
+import com.work.here.domain.entity.enums.Role;
 import com.work.here.domain.repository.SelfIntroRepository;
 import com.work.here.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,10 +28,16 @@ public class SelfIntroService {
                 .collect(Collectors.toList());
     }
 
+    // 특정 ID의 자기소개서를 가져오는 메서드
+    public Optional<SelfIntroDto> getSelfIntroductionById(Long id) {
+        return selfIntroRepository.findById(id)
+                .map(this::mapToDto);
+    }
+
     // 자기소개서 생성
-    public void createSelfIntroduction(SelfIntroDto selfIntroDto, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+    public void createSelfIntroduction(SelfIntroDto selfIntroDto, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
         SelfIntro selfIntroduction = new SelfIntro();
         selfIntroduction.setTitle(selfIntroDto.getTitle());
@@ -41,9 +49,14 @@ public class SelfIntroService {
     }
 
     // 자기소개서 업데이트
-    public void updateSelfIntroduction(Long id, SelfIntroDto selfIntroDto) {
+    public void updateSelfIntroduction(Long id, SelfIntroDto selfIntroDto, Long userId) {
         SelfIntro selfIntroduction = selfIntroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Self Introduction not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Self Introduction not found with ID: " + id));
+
+        // 권한 체크
+        if (!isOwnerOrAdmin(selfIntroduction, userId)) {
+            throw new RuntimeException("You are not authorized to update this self introduction");
+        }
 
         selfIntroduction.setTitle(selfIntroDto.getTitle());
         selfIntroduction.setContent(selfIntroDto.getContent());
@@ -53,10 +66,25 @@ public class SelfIntroService {
     }
 
     // 자기소개서 삭제
-    public void deleteSelfIntroduction(Long id) {
+    public void deleteSelfIntroduction(Long id, Long userId) {
         SelfIntro selfIntroduction = selfIntroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Self Introduction not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Self Introduction not found with ID: " + id));
+
+        // 권한 체크
+        if (!isOwnerOrAdmin(selfIntroduction, userId)) {
+            throw new RuntimeException("You are not authorized to delete this self introduction");
+        }
+
         selfIntroRepository.delete(selfIntroduction);
+    }
+
+    // 글 작성자 또는 관리자인지 확인
+    public boolean isOwnerOrAdmin(SelfIntro selfIntro, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        // 작성자이거나 관리자인지 확인
+        return selfIntro.getUser().getId().equals(userId) || user.getRole().equals(Role.ROLE_ADMIN);
     }
 
     // Entity -> DTO 변환
@@ -65,6 +93,12 @@ public class SelfIntroService {
         dto.setTitle(selfIntro.getTitle());
         dto.setContent(selfIntro.getContent());
         dto.setImageUrl(selfIntro.getImageUrl());
+
+        // User에서 이름과 학교 정보 받아오기
+        User user = selfIntro.getUser();
+        dto.setUserName(user.getName());  // User 테이블에서 이름 가져오기
+        dto.setUserSchool(user.getSchool());  // User 테이블에서 학교 가져오기
+
         return dto;
     }
 }

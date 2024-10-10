@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.work.here.domain.entity.User;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,8 +25,9 @@ public class JwtService {
     @Value("${jwt.refresh}") // 리프레시 토큰의 유효 기간 설정
     private long REFRESH_TOKEN_EXPIRATION;
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+    // 사용자 ID 추출 메서드
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> Long.parseLong(claims.get("userId").toString()));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -46,11 +48,10 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        final Long userId = extractUserId(token);
+        return (userId.equals(((User) userDetails).getId()) && !isTokenExpired(token));
     }
 
-    // 접근 제어자 변경
     public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
@@ -59,9 +60,15 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername());
+    public String generateToken(Long userId, UserDetails userDetails) {
+
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .claim("id", userId) // ID를 추가
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10시간
+                .signWith(SignatureAlgorithm.HS256, JWT_SECRET)
+                .compact();
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
@@ -74,9 +81,9 @@ public class JwtService {
                 .compact();
     }
 
-    // 필요시 리프레시 토큰 생성 메서드 추가 가능
-    public String generateRefreshToken(UserDetails userDetails) {
+    public String generateRefreshToken( Long userId, UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId); // 사용자 ID를 claims에 추가
         return createToken(claims, userDetails.getUsername(), REFRESH_TOKEN_EXPIRATION);
     }
 
