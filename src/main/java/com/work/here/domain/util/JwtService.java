@@ -25,9 +25,9 @@ public class JwtService {
     @Value("${jwt.refresh}") // 리프레시 토큰의 유효 기간 설정
     private long REFRESH_TOKEN_EXPIRATION;
 
-    // 사용자 ID 추출 메서드
-    public Long extractUserId(String token) {
-        return extractClaim(token, claims -> Long.parseLong(claims.get("userId").toString()));
+    // 사용자 이메일 추출 메서드
+    public String extractEmail(String token) {
+        return extractClaim(token, Claims::getSubject); // 이메일을 Subject에서 추출
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -48,8 +48,8 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final Long userId = extractUserId(token);
-        return (userId.equals(((User) userDetails).getId()) && !isTokenExpired(token));
+        final String email = extractEmail(token);
+        return (email != null && email.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
     public boolean isTokenExpired(String token) {
@@ -60,31 +60,16 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public String generateToken(Long userId, UserDetails userDetails) {
-
-        return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .claim("id", userId) // ID를 추가
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10시간
-                .signWith(SignatureAlgorithm.HS256, JWT_SECRET)
-                .compact();
-    }
-
-    private String createToken(Map<String, Object> claims, String subject) {
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION)) // 설정한 유효 기간 적용
-                .signWith(SignatureAlgorithm.HS256, JWT_SECRET)
-                .compact();
-    }
-
-    public String generateRefreshToken( Long userId, UserDetails userDetails) {
+    public String generateToken(String email, UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId); // 사용자 ID를 claims에 추가
-        return createToken(claims, userDetails.getUsername(), REFRESH_TOKEN_EXPIRATION);
+        claims.put("email", email); // 이메일을 claims에 추가
+        return createToken(claims, email, ACCESS_TOKEN_EXPIRATION);
+    }
+
+    public String generateRefreshToken(String email, UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("email", email); // 이메일을 claims에 추가
+        return createToken(claims, email, REFRESH_TOKEN_EXPIRATION);
     }
 
     private String createToken(Map<String, Object> claims, String subject, long expiration) {

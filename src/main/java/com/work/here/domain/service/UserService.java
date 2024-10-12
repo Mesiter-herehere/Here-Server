@@ -53,6 +53,6 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // UserDetails 대신 User를 직접 전달합니다.
-        return jwtService.generateToken(user.getId(), user); // User의 ID와 User 객체를 전달
+        return jwtService.generateToken(user.getEmail(), user); // User의 ID와 User 객체를 전달
     }
 }

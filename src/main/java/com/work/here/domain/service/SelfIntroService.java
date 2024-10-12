@@ -35,9 +35,9 @@ public class SelfIntroService {
     }
 
     // 자기소개서 생성
-    public void createSelfIntroduction(SelfIntroDto selfIntroDto, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+    public void createSelfIntroduction(SelfIntroDto selfIntroDto, String userEmail) {
+        User user = userRepository.findByEmail(userEmail) // 이메일로 사용자 찾기
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
 
         SelfIntro selfIntroduction = new SelfIntro();
         selfIntroduction.setTitle(selfIntroDto.getTitle());
@@ -49,12 +49,12 @@ public class SelfIntroService {
     }
 
     // 자기소개서 업데이트
-    public void updateSelfIntroduction(Long id, SelfIntroDto selfIntroDto, Long userId) {
+    public void updateSelfIntroduction(Long id, SelfIntroDto selfIntroDto, String userEmail) {
         SelfIntro selfIntroduction = selfIntroRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Self Introduction not found with ID: " + id));
 
         // 권한 체크
-        if (!isOwnerOrAdmin(selfIntroduction, userId)) {
+        if (!isOwnerOrAdmin(selfIntroduction, userEmail)) {
             throw new RuntimeException("You are not authorized to update this self introduction");
         }
 
@@ -66,12 +66,12 @@ public class SelfIntroService {
     }
 
     // 자기소개서 삭제
-    public void deleteSelfIntroduction(Long id, Long userId) {
+    public void deleteSelfIntroduction(Long id, String userEmail) {
         SelfIntro selfIntroduction = selfIntroRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Self Introduction not found with ID: " + id));
 
         // 권한 체크
-        if (!isOwnerOrAdmin(selfIntroduction, userId)) {
+        if (!isOwnerOrAdmin(selfIntroduction, userEmail)) {
             throw new RuntimeException("You are not authorized to delete this self introduction");
         }
 
@@ -79,12 +79,13 @@ public class SelfIntroService {
     }
 
     // 글 작성자 또는 관리자인지 확인
-    public boolean isOwnerOrAdmin(SelfIntro selfIntro, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+    public boolean isOwnerOrAdmin(SelfIntro selfIntroduction, String userEmail) {
+        Long introUserId = selfIntroduction.getUser().getId(); // 작성자의 사용자 ID 가져오기
+        User user = userRepository.findByEmail(userEmail) // 이메일로 사용자 찾기
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
 
         // 작성자이거나 관리자인지 확인
-        return selfIntro.getUser().getId().equals(userId) || user.getRole().equals(Role.ROLE_ADMIN);
+        return introUserId.equals(user.getId()) || user.getRole() == Role.ROLE_ADMIN;
     }
 
     // Entity -> DTO 변환

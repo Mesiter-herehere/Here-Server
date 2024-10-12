@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import lombok.RequiredArgsConstructor;
 import com.work.here.domain.dto.SelfIntroDto;
 import com.work.here.domain.service.SelfIntroService;
+import com.work.here.domain.entity.SelfIntro;
 import com.work.here.domain.util.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
@@ -40,8 +41,8 @@ public class SelfIntroController {
             @RequestBody SelfIntroDto selfIntroDto,
             HttpServletRequest request) {
         try {
-            Long userId = extractUserIdFromJwt(request);
-            selfIntroService.createSelfIntroduction(selfIntroDto, userId);
+            String userEmail = extractUserEmailFromJwt(request);
+            selfIntroService.createSelfIntroduction(selfIntroDto, userEmail);
             return ResponseEntity.ok("Self Introduction created successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Failed to create self introduction: " + e.getMessage());
@@ -55,20 +56,10 @@ public class SelfIntroController {
                                                          @RequestBody SelfIntroDto selfIntroDto,
                                                          HttpServletRequest request) {
         try {
-            Long userId = extractUserIdFromJwt(request);
-
-            // SelfIntroDto 객체를 가져오기 (SelfIntro로 바꿀 필요 없음)
-            SelfIntroDto selfIntro = selfIntroService.getSelfIntroductionById(id)
-                    .orElseThrow(() -> new RuntimeException("Self Introduction not found with id: " + id));
-
-            // 소유자 또는 관리자인지 확인
-            if (selfIntroService.isOwnerOrAdmin(selfIntro, userId)) {
-                selfIntroService.updateSelfIntroduction(id, selfIntroDto, userId);
-                return ResponseEntity.ok("Self Introduction updated successfully");
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("You are not authorized to update this self introduction");
-            }
+            String userEmail = extractUserEmailFromJwt(request);
+            // 자기소개서 업데이트
+            selfIntroService.updateSelfIntroduction(id, selfIntroDto, userEmail);
+            return ResponseEntity.ok("Self Introduction updated successfully");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Failed to update self introduction: " + e.getMessage());
@@ -83,18 +74,9 @@ public class SelfIntroController {
     @Secured({"ROLE_STUDENT", "ROLE_ADMIN"})  // 학생과 관리자 모두 삭제 가능
     public ResponseEntity<String> deleteSelfIntroduction(@PathVariable Long id, HttpServletRequest request) {
         try {
-            Long userId = extractUserIdFromJwt(request);
-            SelfIntroDto selfIntro = selfIntroService.getSelfIntroductionById(id)
-                    .orElseThrow(() -> new RuntimeException("Self Introduction not found with id: " + id));
-
-            // 소유자 또는 관리자인지 확인
-            if (selfIntroService.isOwnerOrAdmin(selfIntro, userId)) {
-                selfIntroService.deleteSelfIntroduction(id, userId);
-                return ResponseEntity.ok("Self Introduction deleted successfully");
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("You are not authorized to delete this self introduction");
-            }
+            String userEmail = extractUserEmailFromJwt(request);
+            selfIntroService.deleteSelfIntroduction(id, userEmail);
+            return ResponseEntity.ok("Self Introduction deleted successfully");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Failed to delete self introduction: " + e.getMessage());
@@ -104,8 +86,8 @@ public class SelfIntroController {
         }
     }
 
-    // JWT에서 사용자 ID 추출
-    private Long extractUserIdFromJwt(HttpServletRequest request) {
+    // JWT에서 사용자 이메일 추출
+    private String extractUserEmailFromJwt(HttpServletRequest request) {
         String jwtToken = request.getHeader("Authorization");
 
         if (jwtToken != null && jwtToken.startsWith("Bearer ")) {
@@ -113,7 +95,7 @@ public class SelfIntroController {
             if (jwtService.isTokenExpired(jwtToken)) {
                 throw new RuntimeException("Token is expired");
             }
-            return jwtService.extractUserId(jwtToken); // JWT에서 사용자 ID 추출
+            return jwtService.extractEmail(jwtToken); // JWT에서 사용자 이메일 추출
         } else {
             throw new RuntimeException("Authorization header is missing or invalid");
         }
