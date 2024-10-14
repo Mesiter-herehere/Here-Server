@@ -12,7 +12,7 @@ public class SelfIntroDto {
     private String title;
     private String content;
     private String imageUrl;
-//    private Long userId;
+    //    private Long userId;
     private String userName;    // 작성자 이름
     private School userSchool;  // 작성자 학교 (열거형 School)
 }

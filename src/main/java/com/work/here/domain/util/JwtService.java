@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import com.work.here.domain.entity.User;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,8 +41,7 @@ public class JwtService {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
-            // 예외 처리 (로그 기록 등)
-            return null;
+            throw new IllegalArgumentException("Claims could not be extracted from token", e);
         }
     }
 
