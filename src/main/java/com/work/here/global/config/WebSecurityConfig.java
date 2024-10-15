@@ -38,6 +38,7 @@ public class WebSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // 인증 없이 접근 허용
+//                        .requestMatchers("/api/self-intro/**").permitAll()
                         .requestMatchers("/api/self-intro/**").authenticated()
                         .requestMatchers("/api/verify-token").authenticated() // 토큰 검증은 인증 필요
                         .anyRequest().authenticated()

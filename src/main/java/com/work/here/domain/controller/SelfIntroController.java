@@ -24,13 +24,13 @@ public class SelfIntroController {
     private final JwtService jwtService;
     private final UserRepository userRepository; // Inject UserRepository
 
-    @GetMapping
+    @GetMapping(value = "/main",produces = "application/json")
     public ResponseEntity<List<SelfIntroDto>> getAllSelfIntroductions() {
         List<SelfIntroDto> selfIntroductions = selfIntroService.getAllSelfIntroductions();
         return ResponseEntity.ok(selfIntroductions);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/main/{id}", produces = "application/json")
     public ResponseEntity<SelfIntroDto> getSelfIntroductionById(@PathVariable Long id) {
         SelfIntroDto selfIntro = selfIntroService.getSelfIntroductionById(id)
                 .orElseThrow(() -> new RuntimeException("Self Introduction not found"));
