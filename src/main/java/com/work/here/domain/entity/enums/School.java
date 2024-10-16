@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum School {
     GWANGJU_SOFTWARE_MAESTER("광주소프트웨어마이스터고등학교"),
-    DAE_SOFTWARE_MAESTER("대소프트웨어마이스터고등학교"),
+    DAE_SOFTWARE_MAESTER("대구소프트웨어마이스터고등학교"),
     DAEJEON_SOFTWARE_MAESTER("대전소프트웨어마이스터고등학교"),
     BUSAN_SOFTWARE_MAESTER("부산소프트웨어마이스터고등학교");
 
