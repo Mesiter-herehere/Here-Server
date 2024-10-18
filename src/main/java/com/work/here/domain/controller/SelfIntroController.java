@@ -1,5 +1,6 @@
 package com.work.here.domain.controller;
 
+import com.work.here.domain.entity.enums.School;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import lombok.RequiredArgsConstructor;
@@ -115,6 +116,21 @@ public class SelfIntroController {
             return jwtService.extractEmail(jwtToken);
         } else {
             throw new RuntimeException("Authorization header is missing or invalid");
+        }
+    }
+
+    //학교별 필터링
+
+    @GetMapping(value = "/school", produces = "application/json")
+    public ResponseEntity<?> getSelfIntroductionsBySchool(@RequestParam String school) {
+        try {
+            School schoolEnum = School.fromString(school);
+            List<SelfIntroDto> selfIntroductions = selfIntroService.getSelfIntroductionsBySchool(schoolEnum);
+            return ResponseEntity.ok(selfIntroductions);
+        } catch (IllegalArgumentException e) {
+            // Return a clear message when an invalid school is provided
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid school provided: " + school);
         }
     }
 }

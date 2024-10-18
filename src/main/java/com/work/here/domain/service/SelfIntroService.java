@@ -4,6 +4,7 @@ import com.work.here.domain.entity.SelfIntro;
 import com.work.here.domain.entity.User;
 import com.work.here.domain.dto.SelfIntroDto;
 import com.work.here.domain.entity.enums.Role;
+import com.work.here.domain.entity.enums.School;
 import com.work.here.domain.repository.SelfIntroRepository;
 import com.work.here.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -139,6 +140,15 @@ public class SelfIntroService {
             }
         }
         return false;
+    }
+//    학교별 필터링 메소드
+
+    public List<SelfIntroDto> getSelfIntroductionsBySchool(School school) {
+        return selfIntroRepository.findAll()
+                .stream()
+                .filter(selfIntro -> selfIntro.getUser().getSchool().equals(school))  // equals로 학교 비교
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
     }
 
     // Entity -> DTO 변환
