@@ -10,6 +10,9 @@ import com.work.here.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -165,4 +168,16 @@ public class SelfIntroService {
 
         return dto;
     }
+
+
+    public Page<SelfIntroDto> getPaginatedSelfIntroductions(Pageable pageable) {
+        return selfIntroRepository.findAll(pageable)
+                .map(this::mapToDto);
+    }
+
+//    //자기소개 글이 존재하는지 확인
+//    public Optional<SelfIntroDto> getSelfIntroductionByUser(String userEmail) {
+//        return selfIntroRepository.findByUserEmail(userEmail)
+//                .map(this::mapToDto);
+//    }
 }
