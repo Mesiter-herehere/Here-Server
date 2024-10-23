@@ -32,21 +32,7 @@ public class SelfIntroController {
     private final JwtService jwtService;
     private final UserRepository userRepository; // Inject UserRepository
 
-    @GetMapping(value = "/main",produces = "application/json")
-    public ResponseEntity<List<SelfIntroDto>> getAllSelfIntroductions() {
-        List<SelfIntroDto> selfIntroductions = selfIntroService.getAllSelfIntroductions();
-        return ResponseEntity.ok(selfIntroductions);
-    }
-
-    @GetMapping(value = "/main/{id}", produces = "application/json")
-    public ResponseEntity<SelfIntroDto> getSelfIntroductionById(@PathVariable Long id) {
-        SelfIntroDto selfIntro = selfIntroService.getSelfIntroductionById(id)
-                .orElseThrow(() -> new RuntimeException("Self Introduction not found"));
-        return ResponseEntity.ok(selfIntro);
-    }
-
     //페이징
-
     @GetMapping(value = "/paginated", produces = "application/json")
     public ResponseEntity<Page<SelfIntroDto>> getPaginatedSelfIntroductions(
             @PageableDefault(size = 10) Pageable pageable) {
@@ -56,7 +42,6 @@ public class SelfIntroController {
 
 
     //학교별 필터링&전체 코드
-
     @GetMapping(value = "/main/school", produces = "application/json")
     public ResponseEntity<?> getSelfIntroductionsBySchool(@RequestParam(required = false) String school) {
         try {
@@ -75,8 +60,18 @@ public class SelfIntroController {
         }
     }
 
+    //자기소개에 학생, 학교 띄우기
+//    @GetMapping(value = "/user-info", produces = "application/json")
+//    public ResponseEntity<SelfIntroDto> getUserInfo(HttpServletRequest request) {
+//        // JWT에서 사용자 이메일 추출
+//        String userEmail = extractUserEmailFromJwt(request);
+//        // 사용자의 이름과 학교 정보 가져오기
+//        SelfIntroDto userInfo = selfIntroService.getUserNameAndSchool(userEmail);
+//        return ResponseEntity.ok(userInfo);
+//    }
 
 
+    //자기소개 CRUD
     @PostMapping(consumes = "multipart/form-data")
     @Secured("ROLE_STUDENT")
     public ResponseEntity<String> createSelfIntroduction(
@@ -90,7 +85,6 @@ public class SelfIntroController {
             selfIntroDto.setTitle(title);
             selfIntroDto.setContent(content);
 
-            // Set userName and userSchool
             User user = userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
             selfIntroDto.setUserName(user.getName());
@@ -147,6 +141,7 @@ public class SelfIntroController {
         }
     }
 
+    // jwt 토큰에서 이메일 추출
     private String extractUserEmailFromJwt(HttpServletRequest request) {
         String jwtToken = request.getHeader("Authorization");
         if (jwtToken != null && jwtToken.startsWith("Bearer ")) {
@@ -159,6 +154,21 @@ public class SelfIntroController {
             throw new RuntimeException("Authorization header is missing or invalid");
         }
     }
+
+//포스트 띄우기
+//    @GetMapping(value = "/main",produces = "application/json")
+//    public ResponseEntity<List<SelfIntroDto>> getAllSelfIntroductions() {
+//        List<SelfIntroDto> selfIntroductions = selfIntroService.getAllSelfIntroductions();
+//        return ResponseEntity.ok(selfIntroductions);
+//    }
+//
+//    @GetMapping(value = "/main/{id}", produces = "application/json")
+//    public ResponseEntity<SelfIntroDto> getSelfIntroductionById(@PathVariable Long id) {
+//        SelfIntroDto selfIntro = selfIntroService.getSelfIntroductionById(id)
+//                .orElseThrow(() -> new RuntimeException("Self Introduction not found"));
+//        return ResponseEntity.ok(selfIntro);
+//    }
+
 
 
 }

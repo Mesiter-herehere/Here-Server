@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -27,8 +26,7 @@ public class SelfIntroService {
 
     private final SelfIntroRepository selfIntroRepository;
     private final UserRepository userRepository;
-    private final String[] allowedFileExtensions = {".jpg", ".jpeg", ".png", ".gif"};
-
+    private final String[] allowedFileExtensions = {".jpg", ".jpeg", ".png", ".svg"};
 
     // 전체 자기소개서 리스트 가져오기
     public List<SelfIntroDto> getAllSelfIntroductions() {
@@ -36,12 +34,6 @@ public class SelfIntroService {
                 .stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
-    }
-
-    // 특정 ID의 자기소개서를 가져오는 메서드
-    public Optional<SelfIntroDto> getSelfIntroductionById(Long id) {
-        return selfIntroRepository.findById(id)
-                .map(this::mapToDto);
     }
 
     // 자기소개서 생성
@@ -92,7 +84,19 @@ public class SelfIntroService {
             throw new RuntimeException("You are not authorized to delete this self introduction");
         }
 
+        if (selfIntroduction.getImageUrl() != null) {
+            deleteFile(selfIntroduction.getImageUrl());
+        }
+
         selfIntroRepository.delete(selfIntroduction);
+    }
+
+    // 파일 삭제 메서드 추가
+    public void deleteFile(String filePath) {
+        File file = new File("C:/uploads/" + Paths.get(filePath).getFileName().toString());
+        if (file.exists()) {
+            file.delete();
+        }
     }
 
     // 글 작성자 또는 관리자인지 확인
@@ -105,7 +109,7 @@ public class SelfIntroService {
         return introUserId.equals(user.getId()) || user.getRole() == Role.ROLE_ADMIN;
     }
 
-    // 파일을 저장하고 URL을 반환하는 메서드
+    // 파일을 저장
     public String saveFile(MultipartFile file) throws IOException {
         if (file != null && !file.isEmpty()) {
             // 파일 확장자 검사
@@ -117,7 +121,6 @@ public class SelfIntroService {
             // 파일 이름 중복 방지를 위해 시간 정보를 추가
             String fileName = System.currentTimeMillis() + "_" + originalFileName;
             String uploadDirPath = "C:/uploads/"; // 파일을 저장할 디렉토리 경로 (절대 경로로 변경 가능)
-            String filePath = Paths.get(uploadDirPath, fileName).toString(); // 파일을 저장할 경로 설정
 
             // 파일을 저장할 디렉토리 존재 확인 및 생성
             File uploadDir = new File(uploadDirPath);
@@ -126,10 +129,10 @@ public class SelfIntroService {
             }
 
             // 파일 저장
-            File destinationFile = new File(filePath);
+            File destinationFile = new File(uploadDirPath + fileName);
             file.transferTo(destinationFile);
 
-            return filePath; // 저장된 파일 경로 반환
+            return fileName; // 파일 이름만 반환
         }
         return null; // 파일이 없을 경우 null 반환
     }
@@ -144,8 +147,8 @@ public class SelfIntroService {
         }
         return false;
     }
-//    학교별 필터링 메소드
 
+    // 학교별 필터링 메소드
     public List<SelfIntroDto> getSelfIntroductionsBySchool(School school) {
         return selfIntroRepository.findAll()
                 .stream()
@@ -159,7 +162,7 @@ public class SelfIntroService {
         SelfIntroDto dto = new SelfIntroDto();
         dto.setTitle(selfIntro.getTitle());
         dto.setContent(selfIntro.getContent());
-        dto.setImageUrl(selfIntro.getImageUrl());
+        dto.setImageUrl(convertToHttpUrl(selfIntro.getImageUrl()));
 
         // User에서 이름과 학교 정보 받아오기
         User user = selfIntro.getUser();
@@ -169,15 +172,17 @@ public class SelfIntroService {
         return dto;
     }
 
+    // 파일 경로를 URL로 변환
+    private String convertToHttpUrl(String filePath) {
+        if (filePath != null) {
+            String fileName = Paths.get(filePath).getFileName().toString();
+            return "http://localhost:8080/uploads/" + fileName;
+        }
+        return null;
+    }
 
     public Page<SelfIntroDto> getPaginatedSelfIntroductions(Pageable pageable) {
         return selfIntroRepository.findAll(pageable)
                 .map(this::mapToDto);
     }
-
-//    //자기소개 글이 존재하는지 확인
-//    public Optional<SelfIntroDto> getSelfIntroductionByUser(String userEmail) {
-//        return selfIntroRepository.findByUserEmail(userEmail)
-//                .map(this::mapToDto);
-//    }
 }

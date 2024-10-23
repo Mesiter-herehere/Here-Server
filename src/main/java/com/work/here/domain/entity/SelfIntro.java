@@ -23,6 +23,7 @@ public class SelfIntro {
     @Column(nullable = false,length = 1500)
     private String content;
 
+
     private String imageUrl;
 
     @ManyToOne
