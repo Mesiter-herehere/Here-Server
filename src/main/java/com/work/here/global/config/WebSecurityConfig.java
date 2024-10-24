@@ -19,14 +19,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
+
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
 
+
+@EnableWebMvc
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class WebSecurityConfig {
+public class WebSecurityConfig implements WebMvcConfigurer {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final CustomUserDetailsService customUserDetailsService;
@@ -38,11 +43,9 @@ public class WebSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // 인증 없이 접근 허용
-
-//                        .requestMatchers("/api/self-intro/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/self-intro/**").authenticated()
                         .requestMatchers("/api/verify-token").authenticated() // 토큰 검증은 인증 필요
-
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -85,4 +88,10 @@ public class WebSecurityConfig {
         return source;
     }
 
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // /uploads/** URL로 접근하는 경우 file:///C:/uploads/에서 파일을 제공
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:///C:/uploads/");
+    }
 }

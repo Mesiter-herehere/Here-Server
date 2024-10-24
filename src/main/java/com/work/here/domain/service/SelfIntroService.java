@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -93,7 +94,8 @@ public class SelfIntroService {
 
     // 파일 삭제 메서드 추가
     public void deleteFile(String filePath) {
-        File file = new File("C:/uploads/" + Paths.get(filePath).getFileName().toString());
+        Path path = Paths.get("C:/uploads/", Paths.get(filePath).getFileName().toString());
+        File file = path.toFile();
         if (file.exists()) {
             file.delete();
         }
@@ -120,17 +122,16 @@ public class SelfIntroService {
 
             // 파일 이름 중복 방지를 위해 시간 정보를 추가
             String fileName = System.currentTimeMillis() + "_" + originalFileName;
-            String uploadDirPath = "C:/uploads/"; // 파일을 저장할 디렉토리 경로 (절대 경로로 변경 가능)
+            Path uploadDirPath = Paths.get("C:/uploads/"); // 파일을 저장할 디렉토리 경로 (절대 경로로 변경 가능)
 
             // 파일을 저장할 디렉토리 존재 확인 및 생성
-            File uploadDir = new File(uploadDirPath);
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs(); // 디렉토리 생성
+            if (!uploadDirPath.toFile().exists()) {
+                uploadDirPath.toFile().mkdirs(); // 디렉토리 생성
             }
 
             // 파일 저장
-            File destinationFile = new File(uploadDirPath + fileName);
-            file.transferTo(destinationFile);
+            Path destinationFilePath = uploadDirPath.resolve(fileName);
+            file.transferTo(destinationFilePath.toFile());
 
             return fileName; // 파일 이름만 반환
         }
@@ -176,7 +177,7 @@ public class SelfIntroService {
     private String convertToHttpUrl(String filePath) {
         if (filePath != null) {
             String fileName = Paths.get(filePath).getFileName().toString();
-            return "http://localhost:8080/uploads/" + fileName;
+            return "https://endlessly-cuddly-salmon.ngrok-free.app/uploads/" + fileName;
         }
         return null;
     }
