@@ -49,6 +49,7 @@ public class SelfIntroService {
         selfIntroduction.setContent(selfIntroDto.getContent());
         selfIntroduction.setImageUrl(imageUrl); // 저장된 이미지 URL 설정
         selfIntroduction.setUser(user);
+        System.out.println(selfIntroDto.getTitle());
 
         selfIntroRepository.save(selfIntroduction);
     }

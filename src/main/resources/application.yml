@@ -6,7 +6,8 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USER}
     password: ${DB_PASSWORD}
-    url: ${DB_URL}
+    url: ${DB_URL}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+
 
 
   jpa:
@@ -46,3 +47,10 @@ jwt:
   access: 2592000000
   refresh: 2592000000
 
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+      force-response: true
