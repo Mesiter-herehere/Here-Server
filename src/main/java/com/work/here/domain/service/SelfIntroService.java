@@ -183,6 +183,20 @@ public class SelfIntroService {
         return null;
     }
 
+    //학교 정보와 이름 가져오기
+    public SelfIntroDto getUserNameAndSchool(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+
+        SelfIntroDto selfIntroDto = new SelfIntroDto();
+        selfIntroDto.setUserName(user.getName());
+        selfIntroDto.setUserSchool(user.getSchool());
+
+        return selfIntroDto;
+    }
+
+
+//    페이징
     public Page<SelfIntroDto> getPaginatedSelfIntroductions(Pageable pageable) {
         return selfIntroRepository.findAll(pageable)
                 .map(this::mapToDto);

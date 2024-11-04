@@ -60,15 +60,15 @@ public class SelfIntroController {
         }
     }
 
-    //자기소개에 학생, 학교 띄우기
-//    @GetMapping(value = "/user-info", produces = "application/json")
-//    public ResponseEntity<SelfIntroDto> getUserInfo(HttpServletRequest request) {
-//        // JWT에서 사용자 이메일 추출
-//        String userEmail = extractUserEmailFromJwt(request);
-//        // 사용자의 이름과 학교 정보 가져오기
-//        SelfIntroDto userInfo = selfIntroService.getUserNameAndSchool(userEmail);
-//        return ResponseEntity.ok(userInfo);
-//    }
+//    자기소개에 학생, 학교 띄우기
+    @GetMapping(value = "/user-info", produces = "application/json")
+    public ResponseEntity<SelfIntroDto> getUserInfo(HttpServletRequest request) {
+        // JWT에서 사용자 이메일 추출
+        String userEmail = extractUserEmailFromJwt(request);
+        // 사용자의 이름과 학교 정보 가져오기
+        SelfIntroDto userInfo = selfIntroService.getUserNameAndSchool(userEmail);
+        return ResponseEntity.ok(userInfo);
+    }
 
 
     //자기소개 CRUD
