@@ -29,6 +29,12 @@ public class SelfIntroService {
     private final UserRepository userRepository;
     private final String[] allowedFileExtensions = {".jpg", ".jpeg", ".png", ".svg"};
 
+    //    페이징
+    public Page<SelfIntroDto> getPaginatedSelfIntroductions(Pageable pageable) {
+        return selfIntroRepository.findAll(pageable)
+                .map(this::mapToDto);
+    }
+
     // 전체 자기소개서 리스트 가져오기
     public List<SelfIntroDto> getAllSelfIntroductions() {
         return selfIntroRepository.findAll()
@@ -196,9 +202,5 @@ public class SelfIntroService {
     }
 
 
-//    페이징
-    public Page<SelfIntroDto> getPaginatedSelfIntroductions(Pageable pageable) {
-        return selfIntroRepository.findAll(pageable)
-                .map(this::mapToDto);
-    }
+
 }
