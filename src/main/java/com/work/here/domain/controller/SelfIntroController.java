@@ -35,7 +35,7 @@ public class SelfIntroController {
     //페이징
     @GetMapping(value = "/paginated", produces = "application/json")
     public ResponseEntity<Page<SelfIntroDto>> getPaginatedSelfIntroductions(
-            @PageableDefault(size = 10) Pageable pageable) {
+            @PageableDefault(size = 5) Pageable pageable) {
         Page<SelfIntroDto> selfIntroductions = selfIntroService.getPaginatedSelfIntroductions(pageable);
         return ResponseEntity.ok(selfIntroductions);
     }
