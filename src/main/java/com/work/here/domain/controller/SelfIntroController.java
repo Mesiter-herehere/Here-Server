@@ -35,7 +35,7 @@ public class SelfIntroController {
 
 
     // 학교별 필터링 & 페이징 코드
-    @GetMapping(value = "/main/school/paginated", produces = "application/json")
+    @GetMapping(value = "/main/school", produces = "application/json")
     public ResponseEntity<?> getPaginatedSelfIntroductionsBySchool(
             @RequestParam(required = false) String school,
             @PageableDefault(size = 5) Pageable pageable // 기본 페이지 크기 설정
