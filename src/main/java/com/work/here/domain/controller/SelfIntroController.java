@@ -32,33 +32,37 @@ public class SelfIntroController {
     private final JwtService jwtService;
     private final UserRepository userRepository; // Inject UserRepository
 
-    //페이징
-    @GetMapping(value = "/paginated", produces = "application/json")
-    public ResponseEntity<Page<SelfIntroDto>> getPaginatedSelfIntroductions(
-            @PageableDefault(size = 5) Pageable pageable) {
-        Page<SelfIntroDto> selfIntroductions = selfIntroService.getPaginatedSelfIntroductions(pageable);
-        return ResponseEntity.ok(selfIntroductions);
-    }
 
 
-    //학교별 필터링&전체 코드
-    @GetMapping(value = "/main/school", produces = "application/json")
-    public ResponseEntity<?> getSelfIntroductionsBySchool(@RequestParam(required = false) String school) {
+    // 학교별 필터링 & 페이징 코드
+    @GetMapping(value = "/main/school/paginated", produces = "application/json")
+    public ResponseEntity<?> getPaginatedSelfIntroductionsBySchool(
+            @RequestParam(required = false) String school,
+            @PageableDefault(size = 5) Pageable pageable // 기본 페이지 크기 설정
+    ) {
         try {
-            List<SelfIntroDto> selfIntroductions;
+            Page<SelfIntroDto> selfIntroductions;
+
             if (school == null || school.isEmpty()) {
-                selfIntroductions = selfIntroService.getAllSelfIntroductions();
+                // school 파라미터가 없으면 전체 데이터 페이징 조회
+                selfIntroductions = selfIntroService.getPaginatedSelfIntroductions(pageable);
             } else {
+                // school 파라미터가 있으면 필터링된 데이터 페이징 조회
                 School schoolEnum = School.fromString(school);
-                selfIntroductions = selfIntroService.getSelfIntroductionsBySchool(schoolEnum);
+                selfIntroductions = selfIntroService.getPaginatedSelfIntroductionsBySchool(schoolEnum, pageable);
             }
             return ResponseEntity.ok(selfIntroductions);
         } catch (IllegalArgumentException e) {
-            // Return a clear message when an invalid school is provided
+            // 잘못된 school 값이 제공되었을 때의 처리
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Invalid school provided: " + school);
+        } catch (Exception e) {
+            // 기타 예외 발생 시 500 오류 반환
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Error occurred while fetching paginated self-introductions", e.getMessage()));
         }
     }
+
 
 //    자기소개에 학생, 학교 띄우기
     @GetMapping(value = "/user-info", produces = "application/json")
@@ -155,6 +159,25 @@ public class SelfIntroController {
         }
     }
 
+//    에러 메시지
+    public static class ErrorResponse {
+        private String message;
+        private String details;
+
+        public ErrorResponse(String message, String details) {
+            this.message = message;
+            this.details = details;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public String getDetails() {
+            return details;
+        }
+    }
+
 //포스트 띄우기
 //    @GetMapping(value = "/main",produces = "application/json")
 //    public ResponseEntity<List<SelfIntroDto>> getAllSelfIntroductions() {
@@ -170,5 +193,36 @@ public class SelfIntroController {
 //    }
 
 
+//    //학교별 필터링&전체 코드
+//    @GetMapping(value = "/main/school", produces = "application/json")
+//    public ResponseEntity<?> getSelfIntroductionsBySchool(@RequestParam(required = false) String school) {
+//        try {
+//            List<SelfIntroDto> selfIntroductions;
+//            if (school == null || school.isEmpty()) {
+//                selfIntroductions = selfIntroService.getAllSelfIntroductions();
+//            } else {
+//                School schoolEnum = School.fromString(school);
+//                selfIntroductions = selfIntroService.getSelfIntroductionsBySchool(schoolEnum);
+//            }
+//            return ResponseEntity.ok(selfIntroductions);
+//        } catch (IllegalArgumentException e) {
+//            // Return a clear message when an invalid school is provided
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                    .body("Invalid school provided: " + school);
+//        }
+//    }
 
+//    //페이징
+//    @GetMapping(value = "/paginated", produces = "application/json")
+//    public ResponseEntity<?> getPaginatedSelfIntroductions(@PageableDefault(size = 5) Pageable pageable) {
+//        try {
+//            Page<SelfIntroDto> selfIntroductions = selfIntroService.getPaginatedSelfIntroductions(pageable);
+//            return ResponseEntity.ok(selfIntroductions);
+//        } catch (Exception e) {
+//            // 예외 발생 시 상세 정보와 함께 500 상태 코드 반환
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(new ErrorResponse("Error occurred while fetching paginated self-introductions", e.getMessage()));
+//        }
+//    }
+//
 }

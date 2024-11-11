@@ -29,19 +29,19 @@ public class SelfIntroService {
     private final UserRepository userRepository;
     private final String[] allowedFileExtensions = {".jpg", ".jpeg", ".png", ".svg"};
 
-    //    페이징
+    //  페이징
     public Page<SelfIntroDto> getPaginatedSelfIntroductions(Pageable pageable) {
         return selfIntroRepository.findAll(pageable)
                 .map(this::mapToDto);
     }
 
-    // 전체 자기소개서 리스트 가져오기
-    public List<SelfIntroDto> getAllSelfIntroductions() {
-        return selfIntroRepository.findAll()
-                .stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
+    // school 필터링된 페이징 조회
+    public Page<SelfIntroDto> getPaginatedSelfIntroductionsBySchool(School school, Pageable pageable) {
+        return selfIntroRepository.findByUserSchool(school, pageable)
+                .map(this::mapToDto);
     }
+
+
 
     // 자기소개서 생성
     public void createSelfIntroduction(SelfIntroDto selfIntroDto, String userEmail, MultipartFile file) throws IOException {
@@ -156,14 +156,6 @@ public class SelfIntroService {
         return false;
     }
 
-    // 학교별 필터링 메소드
-    public List<SelfIntroDto> getSelfIntroductionsBySchool(School school) {
-        return selfIntroRepository.findAll()
-                .stream()
-                .filter(selfIntro -> selfIntro.getUser().getSchool().equals(school))  // equals로 학교 비교
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
-    }
 
     // Entity -> DTO 변환
     private SelfIntroDto mapToDto(SelfIntro selfIntro) {
@@ -201,6 +193,22 @@ public class SelfIntroService {
         return selfIntroDto;
     }
 
+//    // 학교별 필터링 메소드
+//    public List<SelfIntroDto> getSelfIntroductionsBySchool(School school) {
+//        return selfIntroRepository.findAll()
+//                .stream()
+//                .filter(selfIntro -> selfIntro.getUser().getSchool().equals(school))  // equals로 학교 비교
+//                .map(this::mapToDto)
+//                .collect(Collectors.toList());
+//    }
+
+// 전체 자기소개서 리스트 가져오기
+//    public List<SelfIntroDto> getAllSelfIntroductions() {
+//        return selfIntroRepository.findAll()
+//                .stream()
+//                .map(this::mapToDto)
+//                .collect(Collectors.toList());
+//    }
 
 
 }
