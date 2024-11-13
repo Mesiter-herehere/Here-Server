@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.data.domain.Sort;
 
 
 
@@ -38,7 +38,8 @@ public class SelfIntroController {
     @GetMapping(value = "/main/school", produces = "application/json")
     public ResponseEntity<?> getPaginatedSelfIntroductionsBySchool(
             @RequestParam(required = false) String school,
-            @PageableDefault(size = 5) Pageable pageable // 기본 페이지 크기 설정
+            @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC)
+            Pageable pageable
     ) {
         try {
             Page<SelfIntroDto> selfIntroductions;

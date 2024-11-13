@@ -37,6 +37,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 	implementation 'com.auth0:java-jwt:3.18.2'
+	implementation 'org.hibernate:hibernate-core:6.5.2.Final' // Use your appropriate version
 
 //	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
