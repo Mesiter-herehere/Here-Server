@@ -1,7 +1,7 @@
 package com.work.here.global.config;
 
 import com.work.here.domain.service.CustomUserDetailsService;
-import com.work.here.global.config.JwtAuthenticationFilter;
+import com.work.here.global.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

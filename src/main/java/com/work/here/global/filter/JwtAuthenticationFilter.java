@@ -1,4 +1,4 @@
-package com.work.here.global.config;
+package com.work.here.global.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

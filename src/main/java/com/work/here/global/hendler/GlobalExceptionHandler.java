@@ -1,5 +1,6 @@
-package com.work.here.global.config;
+package com.work.here.global.hendler;
 
+import com.work.here.global.config.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
