@@ -10,6 +10,7 @@ import com.work.here.domain.repository.ReportRepository;
 import com.work.here.domain.repository.SelfIntroRepository;
 import com.work.here.domain.repository.UserRepository;
 import com.work.here.domain.entity.enums.ContentActivity;
+import com.work.here.domain.dto.ReportedDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -218,8 +219,21 @@ public class SelfIntroService {
     }
 
     // 신고된 게시글 조회(5회 이상 신고된 게시글)
-    public List<SelfIntro> getReportedSelfIntroductions() {
-        return selfIntroRepository.findByReportCountGreaterThanEqual(5);
+    public List<ReportedDto> getReportedSelfIntroductions() {
+        List<SelfIntro> reportedSelfIntros = selfIntroRepository.findByReportCountGreaterThanEqual(5);
+        return reportedSelfIntros.stream()
+                .flatMap(selfIntro -> selfIntro.getReports().stream()
+                        .map(report -> new ReportedDto(
+                                selfIntro.getId(),
+                                selfIntro.getTitle(),
+                                selfIntro.getUser().getEmail(),
+                                selfIntro.getUser().getName(),
+                                report.getReporter().getEmail(),
+                                report.getReporter().getName(),
+                                report.getReason()
+                        ))
+                )
+                .collect(Collectors.toList());
     }
 
     // 게시글 삭제
@@ -231,9 +245,18 @@ public class SelfIntroService {
     public void disableUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        if (!user.isEnabled()) {
+            // 이미 비활성화된 경우 로그를 남기거나 무시
+            return;
+        }
         user.setEnabled(false);
         userRepository.save(user);
     }
+
+
+
+
 
 
 //    // 학교별 필터링 메소드

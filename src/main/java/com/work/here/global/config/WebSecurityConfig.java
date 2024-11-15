@@ -46,6 +46,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/self-intro/**").authenticated()
                         .requestMatchers("/api/verify-token").authenticated() // 토큰 검증은 인증 필요
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // 관리자 권한 필요
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

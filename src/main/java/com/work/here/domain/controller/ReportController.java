@@ -2,7 +2,7 @@
 package com.work.here.domain.controller;
 
 import com.work.here.domain.service.SelfIntroService;
-import com.work.here.domain.entity.SelfIntro;
+import com.work.here.domain.dto.ReportedDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/api/reports")
+@RequestMapping("/api/admin")
 @RequiredArgsConstructor
 public class ReportController {
 
@@ -25,6 +25,7 @@ public class ReportController {
 
     // 게시글 신고 API
     @PostMapping
+    @Secured("ROLE_ADMIN")
     public ResponseEntity<String> reportSelfIntroduction(@RequestParam Long selfIntroId,
                                                          @RequestParam String reason,
                                                          HttpServletRequest request) {
@@ -34,15 +35,15 @@ public class ReportController {
     }
 
 // 신고된 게시글 조회 API
-    @GetMapping("/admin/reported-posts")
+    @GetMapping("/reported-posts")
     @Secured("ROLE_ADMIN")
-    public ResponseEntity<List<SelfIntro>> getReportedSelfIntroductions() {
-        List<SelfIntro> reportedPosts = selfIntroService.getReportedSelfIntroductions();
+    public ResponseEntity<List<ReportedDto>> getReportedSelfIntroductions() {
+        List<ReportedDto> reportedPosts = selfIntroService.getReportedSelfIntroductions();
         return ResponseEntity.ok(reportedPosts);
     }
 
     // 게시글 삭제 API
-    @DeleteMapping("/admin/delete-post/{id}")
+    @DeleteMapping("/delete-post/{id}")
     @Secured("ROLE_ADMIN")
     public ResponseEntity<String> deleteSelfIntroduction(@PathVariable Long id) {
         selfIntroService.deleteSelfIntroduction(id);
@@ -50,7 +51,7 @@ public class ReportController {
     }
 
     // 유저 비활성화 API
-    @PostMapping("/admin/disable-user/{userId}")
+    @PostMapping("/disable-user/{userId}")
     @Secured("ROLE_ADMIN")
     public ResponseEntity<String> disableUser(@PathVariable Long userId) {
         selfIntroService.disableUser(userId);

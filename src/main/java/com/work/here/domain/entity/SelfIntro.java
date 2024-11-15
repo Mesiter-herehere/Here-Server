@@ -1,3 +1,4 @@
+// src/main/java/com/work/here/domain/entity/SelfIntro.java
 package com.work.here.domain.entity;
 
 import com.work.here.domain.entity.enums.ContentActivity;
@@ -6,9 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -40,9 +43,13 @@ public class SelfIntro {
 
     @Enumerated(EnumType.STRING)
     private ContentActivity contentActivity = ContentActivity.GENERAL;
-    @Column(nullable = false)
 
+    @Column(nullable = false)
     private int reportCount = 0;
+
+    @OneToMany(mappedBy = "selfIntro", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Getter
+    private List<Report> reports;
 
     public void incrementReportCount() {
         this.reportCount++;
