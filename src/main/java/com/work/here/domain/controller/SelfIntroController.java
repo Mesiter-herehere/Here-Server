@@ -160,6 +160,17 @@ public class SelfIntroController {
         }
     }
 
+    //게시글 신고
+    @PostMapping("/report")
+    public ResponseEntity<String> reportSelfIntroduction(@RequestParam Long selfIntroId,
+                                                         @RequestParam String reason,
+                                                         HttpServletRequest request) {
+        String userEmail = extractUserEmailFromJwt(request);
+        selfIntroService.reportSelfIntroduction(selfIntroId, userEmail, reason);
+        return ResponseEntity.ok("Report submitted successfully");
+    }
+
+
 //    에러 메시지
     public static class ErrorResponse {
         private String message;
@@ -178,6 +189,8 @@ public class SelfIntroController {
             return details;
         }
     }
+
+
 
 //포스트 띄우기
 //    @GetMapping(value = "/main",produces = "application/json")

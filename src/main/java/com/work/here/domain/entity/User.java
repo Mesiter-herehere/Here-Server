@@ -1,22 +1,20 @@
+// src/main/java/com/work/here/domain/entity/User.java
 package com.work.here.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import lombok.NoArgsConstructor;
 
 import java.util.Collection;
 import java.util.List;
 import com.work.here.domain.entity.enums.Role;
 import com.work.here.domain.entity.enums.School;
-import com.work.here.domain.entity.enums.UserActivity;
-
 
 @Entity
 @Data
-
 public class User implements UserDetails {
 
     @Id
@@ -39,29 +37,23 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
-    @Enumerated(EnumType.STRING)
-    private UserActivity userActivity = UserActivity.NORMAL;
-
-
-
-    public void changeActivity(UserActivity newActivity) {
-        this.userActivity = newActivity;
-    }
-
-
+    @Column(nullable = false)
+    @Setter
+    private boolean enabled = true;
 
     // 기본 생성자 추가
     public User() {
     }
 
     @Builder
-    public User(Long id, String email, String name, School school, String password, Role role) {
+    public User(Long id, String email, String name, School school, String password, Role role, boolean enabled) {
         this.id = id;
         this.email = email;
         this.name = name;
         this.school = school;
         this.password = password;
         this.role = role;
+        this.enabled = enabled;
     }
 
     @Override
@@ -91,6 +83,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return enabled;
     }
 }

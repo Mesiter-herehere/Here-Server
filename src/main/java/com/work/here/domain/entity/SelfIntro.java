@@ -1,18 +1,14 @@
 package com.work.here.domain.entity;
 
 import com.work.here.domain.entity.enums.ContentActivity;
-import com.work.here.domain.entity.enums.UserActivity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
-
-import java.util.Date;
 
 @Entity
 @Data
@@ -44,6 +40,13 @@ public class SelfIntro {
 
     @Enumerated(EnumType.STRING)
     private ContentActivity contentActivity = ContentActivity.GENERAL;
+    @Column(nullable = false)
+
+    private int reportCount = 0;
+
+    public void incrementReportCount() {
+        this.reportCount++;
+    }
 
     public void changeActivity(ContentActivity newActivity) {
         this.contentActivity = newActivity;

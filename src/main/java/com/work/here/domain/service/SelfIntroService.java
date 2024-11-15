@@ -1,12 +1,15 @@
 package com.work.here.domain.service;
 
+import com.work.here.domain.entity.Report;
 import com.work.here.domain.entity.SelfIntro;
 import com.work.here.domain.entity.User;
 import com.work.here.domain.dto.SelfIntroDto;
 import com.work.here.domain.entity.enums.Role;
 import com.work.here.domain.entity.enums.School;
+import com.work.here.domain.repository.ReportRepository;
 import com.work.here.domain.repository.SelfIntroRepository;
 import com.work.here.domain.repository.UserRepository;
+import com.work.here.domain.entity.enums.ContentActivity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +28,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SelfIntroService {
 
+
+
+    private final ReportRepository reportRepository;
     private final SelfIntroRepository selfIntroRepository;
     private final UserRepository userRepository;
     private final String[] allowedFileExtensions = {".jpg", ".jpeg", ".png", ".svg"};
@@ -192,6 +198,43 @@ public class SelfIntroService {
 
         return selfIntroDto;
     }
+
+    //신고 기능
+    public void reportSelfIntroduction(Long selfIntroId, String userEmail, String reason) {
+        SelfIntro selfIntro = selfIntroRepository.findById(selfIntroId)
+                .orElseThrow(() -> new RuntimeException("Self Introduction not found with ID: " + selfIntroId));
+
+        User reporter = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+
+        Report report = new Report(selfIntro, reporter, reason);
+        reportRepository.save(report);
+
+        selfIntro.incrementReportCount();
+        if (selfIntro.getReportCount() >= 5) {
+            selfIntro.changeActivity(ContentActivity.FLAGGED);
+        }
+        selfIntroRepository.save(selfIntro);
+    }
+
+    // 신고된 게시글 조회(5회 이상 신고된 게시글)
+    public List<SelfIntro> getReportedSelfIntroductions() {
+        return selfIntroRepository.findByReportCountGreaterThanEqual(5);
+    }
+
+    // 게시글 삭제
+    public void deleteSelfIntroduction(Long id) {
+        selfIntroRepository.deleteById(id);
+    }
+
+    // 유저 비활성화
+    public void disableUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+        user.setEnabled(false);
+        userRepository.save(user);
+    }
+
 
 //    // 학교별 필터링 메소드
 //    public List<SelfIntroDto> getSelfIntroductionsBySchool(School school) {
