@@ -1,5 +1,7 @@
 package com.work.here.domain.entity;
 
+import com.work.here.domain.entity.enums.ContentActivity;
+import com.work.here.domain.entity.enums.UserActivity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,4 +42,10 @@ public class SelfIntro {
     @Column(name = "created_date", nullable = false, updatable = false)
     private LocalDateTime createdDate;
 
+    @Enumerated(EnumType.STRING)
+    private ContentActivity contentActivity = ContentActivity.GENERAL;
+
+    public void changeActivity(ContentActivity newActivity) {
+        this.contentActivity = newActivity;
+    }
 }
