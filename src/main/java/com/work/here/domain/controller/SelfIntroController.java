@@ -76,7 +76,8 @@ public class SelfIntroController {
     }
 
 
-    //자기소개 CRUD
+
+    //자기소개 생성
     @PostMapping(consumes = "multipart/form-data")
     @Secured("ROLE_STUDENT")
     public ResponseEntity<String> createSelfIntroduction(
@@ -102,6 +103,7 @@ public class SelfIntroController {
         }
     }
 
+    //자기소개 수정
     @PutMapping("/{id}")
     @Secured({"ROLE_STUDENT", "ROLE_ADMIN"})
     public ResponseEntity<String> updateSelfIntroduction(@PathVariable Long id,
@@ -132,6 +134,31 @@ public class SelfIntroController {
 
     }
 
+    //자기소개 조회
+    @GetMapping("/{id}")
+    @Secured({"ROLE_STUDENT", "ROLE_ADMIN"})
+    public ResponseEntity<SelfIntroDto> getSelfIntroduction(@PathVariable Long id, HttpServletRequest request) {
+        try {
+            // 사용자 이메일 추출
+            String userEmail = extractUserEmailFromJwt(request);
+            System.out.println("User email: " + userEmail); // Logging user email
+            System.out.println("SelfIntro ID: " + id); // Logging self-intro ID
+
+            // SelfIntroduction 데이터 조회
+            SelfIntroDto selfIntro = selfIntroService.getSelfIntroductionByIdAndUserEmail(id, userEmail);
+            System.out.println("SelfIntro found: " + selfIntro); // Logging self-intro details
+
+            return ResponseEntity.ok(selfIntro);
+        } catch (RuntimeException e) {
+            System.err.println("RuntimeException: " + e.getMessage()); // Logging exception
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            System.err.println("Exception: " + e.getMessage()); // Logging exception
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    //자기소개 삭제
     @DeleteMapping("/{id}")
     @Secured({"ROLE_STUDENT", "ROLE_ADMIN"})
     public ResponseEntity<String> deleteSelfIntroduction(@PathVariable Long id, HttpServletRequest request) {

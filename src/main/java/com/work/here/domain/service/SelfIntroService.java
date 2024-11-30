@@ -48,10 +48,24 @@ public class SelfIntroService {
                 .map(this::mapToDto);
     }
 
+    // 자기소개서 상세 조회
+    public SelfIntroDto getSelfIntroductionByIdAndUserEmail(Long id, String userEmail) {
+        // 데이터베이스에서 ID와 이메일을 기준으로 자기소개서를 조회
+        SelfIntro selfIntro = selfIntroRepository.findByIdAndUserEmail(id, userEmail)
+                .orElseThrow(() -> new RuntimeException("Self Introduction not found or access denied"));
+
+        // 조회된 엔티티를 DTO로 변환하여 반환
+        return mapToDto(selfIntro);
+    }
+
 
 
     // 자기소개서 생성
     public void createSelfIntroduction(SelfIntroDto selfIntroDto, String userEmail, MultipartFile file) throws IOException {
+        if (userHasSelfIntro(userEmail)) {
+            throw new RuntimeException("User already has a self introduction");
+        }
+
         User user = userRepository.findByEmail(userEmail) // 이메일로 사용자 찾기
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
 
@@ -62,7 +76,7 @@ public class SelfIntroService {
         selfIntroduction.setContent(selfIntroDto.getContent());
         selfIntroduction.setImageUrl(imageUrl); // 저장된 이미지 URL 설정
         selfIntroduction.setUser(user);
-        System.out.println(selfIntroDto.getTitle());
+
 
         selfIntroRepository.save(selfIntroduction);
     }
@@ -252,6 +266,11 @@ public class SelfIntroService {
         }
         user.setEnabled(false);
         userRepository.save(user);
+    }
+
+    // 유저 자기소개서 여부 확인
+    public boolean userHasSelfIntro(String userEmail) {
+        return selfIntroRepository.existsByUserEmail(userEmail);
     }
 
 

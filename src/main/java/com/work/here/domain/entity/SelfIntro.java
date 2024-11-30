@@ -58,4 +58,5 @@ public class SelfIntro {
     public void changeActivity(ContentActivity newActivity) {
         this.contentActivity = newActivity;
     }
+
 }
