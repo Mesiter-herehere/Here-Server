@@ -49,14 +49,14 @@ public class SelfIntroService {
     }
 
     // 자기소개서 상세 조회
-    public SelfIntroDto getSelfIntroductionByIdAndUserEmail(Long id, String userEmail) {
-        // 데이터베이스에서 ID와 이메일을 기준으로 자기소개서를 조회
-        SelfIntro selfIntro = selfIntroRepository.findByIdAndUserEmail(id, userEmail)
-                .orElseThrow(() -> new RuntimeException("Self Introduction not found or access denied"));
+    public SelfIntroDto getSelfIntroductionByUserEmail(String userEmail) {
+        SelfIntro selfIntro = selfIntroRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("Self Introduction not found for user with email: " + userEmail));
 
-        // 조회된 엔티티를 DTO로 변환하여 반환
+        // SelfIntro 엔티티를 DTO로 변환
         return mapToDto(selfIntro);
     }
+
 
 
 
@@ -82,26 +82,25 @@ public class SelfIntroService {
     }
 
     // 자기소개서 업데이트
-    public void updateSelfIntroduction(Long id, SelfIntroDto selfIntroDto, String userEmail, MultipartFile file) throws IOException {
-        SelfIntro selfIntroduction = selfIntroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Self Introduction not found with ID: " + id));
-
-        // 권한 체크
-        if (!isOwnerOrAdmin(selfIntroduction, userEmail)) {
-            throw new RuntimeException("You are not authorized to update this self introduction");
-        }
+    public void updateSelfIntroductionByEmail(SelfIntroDto selfIntroDto, String userEmail, MultipartFile file) throws IOException {
+        // 사용자의 자기소개 검색 (이메일 기반)
+        SelfIntro selfIntroduction = selfIntroRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("Self Introduction not found for user with email: " + userEmail));
 
         // 파일 처리 로직 추가 (파일이 존재하는 경우에만)
         if (file != null && !file.isEmpty()) {
-            String imageUrl = saveFile(file);
+            String imageUrl = saveFile(file); // 파일 저장
             selfIntroduction.setImageUrl(imageUrl); // 저장된 이미지 URL 설정
         }
 
+        // 제목과 내용 업데이트
         selfIntroduction.setTitle(selfIntroDto.getTitle());
         selfIntroduction.setContent(selfIntroDto.getContent());
 
+        // 업데이트된 객체 저장
         selfIntroRepository.save(selfIntroduction);
     }
+
 
     // 자기소개서 삭제
     public void deleteSelfIntroduction(Long id, String userEmail) {

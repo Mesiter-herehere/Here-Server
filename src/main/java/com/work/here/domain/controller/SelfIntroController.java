@@ -68,12 +68,11 @@ public class SelfIntroController {
 //    자기소개에 학생, 학교 띄우기
     @GetMapping(value = "/user-info", produces = "application/json")
     public ResponseEntity<SelfIntroDto> getUserInfo(HttpServletRequest request) {
-        // JWT에서 사용자 이메일 추출
-        String userEmail = extractUserEmailFromJwt(request);
-        // 사용자의 이름과 학교 정보 가져오기
-        SelfIntroDto userInfo = selfIntroService.getUserNameAndSchool(userEmail);
+        String userEmail = extractUserEmailFromJwt(request); // JWT에서 이메일 추출
+        SelfIntroDto userInfo = selfIntroService.getUserNameAndSchool(userEmail); // 해당 이메일의 자기소개 조회
         return ResponseEntity.ok(userInfo);
     }
+
 
 
 
@@ -104,59 +103,51 @@ public class SelfIntroController {
     }
 
     //자기소개 수정
-    @PutMapping("/{id}")
+    @PutMapping
     @Secured({"ROLE_STUDENT", "ROLE_ADMIN"})
-    public ResponseEntity<String> updateSelfIntroduction(@PathVariable Long id,
-                                                         @RequestPart(value = "title") String title,
-                                                         @RequestPart(value = "content") String content,
-                                                         @RequestPart(value = "file", required = false) MultipartFile file,
-                                                         HttpServletRequest request) {
+    public ResponseEntity<String> updateSelfIntroduction(
+            @RequestPart(value = "title") String title,
+            @RequestPart(value = "content") String content,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            HttpServletRequest request) {
         try {
             String userEmail = extractUserEmailFromJwt(request);
             SelfIntroDto selfIntroDto = new SelfIntroDto();
             selfIntroDto.setTitle(title);
             selfIntroDto.setContent(content);
 
-            // Set userName and userSchool
-            User user = userRepository.findByEmail(userEmail)
-                    .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
-            selfIntroDto.setUserName(user.getName());
-            selfIntroDto.setUserSchool(user.getSchool());
-
-            selfIntroService.updateSelfIntroduction(id, selfIntroDto, userEmail, file);
+            // 이메일 기반으로 자기소개 수정
+            selfIntroService.updateSelfIntroductionByEmail(selfIntroDto, userEmail, file);
             return ResponseEntity.ok("Self Introduction updated successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Failed to update self introduction: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update self introduction: " + e.getMessage());
         }
-
-
     }
 
-    //자기소개 조회
-    @GetMapping("/{id}")
-    @Secured({"ROLE_STUDENT", "ROLE_ADMIN"})
-    public ResponseEntity<SelfIntroDto> getSelfIntroduction(@PathVariable Long id, HttpServletRequest request) {
-        try {
-            // 사용자 이메일 추출
-            String userEmail = extractUserEmailFromJwt(request);
-            System.out.println("User email: " + userEmail); // Logging user email
-            System.out.println("SelfIntro ID: " + id); // Logging self-intro ID
 
-            // SelfIntroduction 데이터 조회
-            SelfIntroDto selfIntro = selfIntroService.getSelfIntroductionByIdAndUserEmail(id, userEmail);
-            System.out.println("SelfIntro found: " + selfIntro); // Logging self-intro details
+    // 자기소개 조회
+    @GetMapping("/inquiry")
+    @Secured({"ROLE_STUDENT", "ROLE_ADMIN"})
+    public ResponseEntity<SelfIntroDto> getSelfIntroductionInquiry(HttpServletRequest request) {
+        try {
+            // JWT에서 사용자 이메일 추출
+            String userEmail = extractUserEmailFromJwt(request);
+
+            // 사용자 이메일로 자기소개 조회
+            SelfIntroDto selfIntro = selfIntroService.getSelfIntroductionByUserEmail(userEmail);
+
+            // 자기소개가 없으면 404 반환
+            if (selfIntro == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
 
             return ResponseEntity.ok(selfIntro);
-        } catch (RuntimeException e) {
-            System.err.println("RuntimeException: " + e.getMessage()); // Logging exception
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
-            System.err.println("Exception: " + e.getMessage()); // Logging exception
+            // 예외 발생 시 500 오류 처리
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
 
     //자기소개 삭제
     @DeleteMapping("/{id}")

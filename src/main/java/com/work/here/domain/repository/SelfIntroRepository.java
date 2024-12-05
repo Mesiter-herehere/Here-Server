@@ -14,6 +14,7 @@ public interface SelfIntroRepository extends JpaRepository<SelfIntro, Long> {
     List<SelfIntro> findByReportCountGreaterThanEqual(int reportCount);
     boolean existsByUserEmail(String userEmail);
     Optional<SelfIntro> findByIdAndUserEmail(Long id, String userEmail);
+    Optional<SelfIntro> findByUserEmail(String userEmail);
 
 
 
