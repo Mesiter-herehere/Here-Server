@@ -23,18 +23,18 @@ public class ReportController {
     private final SelfIntroService selfIntroService;
     private final JwtService jwtService;
 
-    // 게시글 신고 API
-    @PostMapping
-    @Secured("ROLE_ADMIN")
-    public ResponseEntity<String> reportSelfIntroduction(@RequestParam Long selfIntroId,
-                                                         @RequestParam String reason,
-                                                         HttpServletRequest request) {
-        String userEmail = extractUserEmailFromJwt(request);
-        selfIntroService.reportSelfIntroduction(selfIntroId, userEmail, reason);
-        return ResponseEntity.ok("Report submitted successfully");
-    }
+//    // 게시글 신고 API
+//    @PostMapping
+//    @Secured("ROLE_ADMIN")
+//    public ResponseEntity<String> reportSelfIntroduction(@RequestParam Long selfIntroId,
+//                                                         @RequestParam String reason,
+//                                                         HttpServletRequest request) {
+//        String userEmail = extractUserEmailFromJwt(request);
+//        selfIntroService.reportSelfIntroduction(selfIntroId, userEmail, reason);
+//        return ResponseEntity.ok("Report submitted successfully");
+//    }
 
-// 신고된 게시글 조회 API
+    // 신고된 게시글 조회 API
     @GetMapping("/reported-posts")
     @Secured("ROLE_ADMIN")
     public ResponseEntity<List<ReportedDto>> getReportedSelfIntroductions() {

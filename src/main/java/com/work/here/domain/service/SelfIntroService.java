@@ -58,25 +58,26 @@ public class SelfIntroService {
     }
 
 
-
-
     // 자기소개서 생성
     public void createSelfIntroduction(SelfIntroDto selfIntroDto, String userEmail, MultipartFile file) throws IOException {
+        if (!isUserEnabled(userEmail)) {
+            throw new RuntimeException("Disabled users cannot create self introductions");
+        }
+
         if (userHasSelfIntro(userEmail)) {
             throw new RuntimeException("User already has a self introduction");
         }
 
-        User user = userRepository.findByEmail(userEmail) // 이메일로 사용자 찾기
+        User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
 
-        String imageUrl = saveFile(file); // 파일 처리 로직 추가
+        String imageUrl = saveFile(file);
 
         SelfIntro selfIntroduction = new SelfIntro();
         selfIntroduction.setTitle(selfIntroDto.getTitle());
         selfIntroduction.setContent(selfIntroDto.getContent());
-        selfIntroduction.setImageUrl(imageUrl); // 저장된 이미지 URL 설정
+        selfIntroduction.setImageUrl(imageUrl);
         selfIntroduction.setUser(user);
-
 
         selfIntroRepository.save(selfIntroduction);
     }
@@ -101,7 +102,6 @@ public class SelfIntroService {
         selfIntroRepository.save(selfIntroduction);
     }
 
-
     // 자기소개서 삭제
     public void deleteSelfIntroduction(Long id, String userEmail) {
         SelfIntro selfIntroduction = selfIntroRepository.findById(id)
@@ -119,6 +119,12 @@ public class SelfIntroService {
         selfIntroRepository.delete(selfIntroduction);
     }
 
+    // 게시글 삭제
+    public void deleteSelfIntroduction(Long id) {
+        selfIntroRepository.deleteById(id);
+    }
+
+
     // 파일 삭제 메서드 추가
     public void deleteFile(String filePath) {
         Path path = Paths.get("C:/uploads/", Paths.get(filePath).getFileName().toString());
@@ -127,6 +133,7 @@ public class SelfIntroService {
             file.delete();
         }
     }
+
 
     // 글 작성자 또는 관리자인지 확인
     public boolean isOwnerOrAdmin(SelfIntro selfIntroduction, String userEmail) {
@@ -176,7 +183,6 @@ public class SelfIntroService {
         return false;
     }
 
-
     // Entity -> DTO 변환
     private SelfIntroDto mapToDto(SelfIntro selfIntro) {
         SelfIntroDto dto = new SelfIntroDto();
@@ -212,6 +218,9 @@ public class SelfIntroService {
 
         return selfIntroDto;
     }
+
+
+
 
     //신고 기능
     public void reportSelfIntroduction(Long selfIntroId, String userEmail, String reason) {
@@ -249,10 +258,6 @@ public class SelfIntroService {
                 .collect(Collectors.toList());
     }
 
-    // 게시글 삭제
-    public void deleteSelfIntroduction(Long id) {
-        selfIntroRepository.deleteById(id);
-    }
 
     // 유저 비활성화
     public void disableUser(Long userId) {
@@ -272,7 +277,11 @@ public class SelfIntroService {
         return selfIntroRepository.existsByUserEmail(userEmail);
     }
 
-
+    public boolean isUserEnabled(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+        return user.isEnabled();
+    }
 
 
 

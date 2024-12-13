@@ -86,6 +86,10 @@ public class SelfIntroController {
             HttpServletRequest request) {
         try {
             String userEmail = extractUserEmailFromJwt(request);
+            if (!selfIntroService.isUserEnabled(userEmail)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Disabled users cannot create self introductions");
+            }
+
             SelfIntroDto selfIntroDto = new SelfIntroDto();
             selfIntroDto.setTitle(title);
             selfIntroDto.setContent(content);
@@ -164,6 +168,16 @@ public class SelfIntroController {
         }
     }
 
+    //게시글 신고
+    @PostMapping("/report")
+    public ResponseEntity<String> reportSelfIntroduction(@RequestParam Long selfIntroId,
+                                                         @RequestParam String reason,
+                                                         HttpServletRequest request) {
+        String userEmail = extractUserEmailFromJwt(request);
+        selfIntroService.reportSelfIntroduction(selfIntroId, userEmail, reason);
+        return ResponseEntity.ok("Report submitted successfully");
+    }
+
     // jwt 토큰에서 이메일 추출
     private String extractUserEmailFromJwt(HttpServletRequest request) {
         String jwtToken = request.getHeader("Authorization");
@@ -178,15 +192,7 @@ public class SelfIntroController {
         }
     }
 
-    //게시글 신고
-    @PostMapping("/report")
-    public ResponseEntity<String> reportSelfIntroduction(@RequestParam Long selfIntroId,
-                                                         @RequestParam String reason,
-                                                         HttpServletRequest request) {
-        String userEmail = extractUserEmailFromJwt(request);
-        selfIntroService.reportSelfIntroduction(selfIntroId, userEmail, reason);
-        return ResponseEntity.ok("Report submitted successfully");
-    }
+
 
 
 //    에러 메시지
