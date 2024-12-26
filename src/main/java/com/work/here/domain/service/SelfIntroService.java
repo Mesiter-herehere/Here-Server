@@ -24,6 +24,9 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -223,12 +226,20 @@ public class SelfIntroService {
 
 
     //신고 기능
+    // src/main/java/com/work/here/domain/service/SelfIntroService.java
+
     public void reportSelfIntroduction(Long selfIntroId, String userEmail, String reason) {
         SelfIntro selfIntro = selfIntroRepository.findById(selfIntroId)
                 .orElseThrow(() -> new RuntimeException("Self Introduction not found with ID: " + selfIntroId));
 
         User reporter = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+
+        // 동일 사용자가 동일 게시글을 이미 신고했는지 확인
+        boolean alreadyReported = reportRepository.existsBySelfIntroAndReporter(selfIntro, reporter);
+        if (alreadyReported) {
+            throw new RuntimeException("You have already reported this post");
+        }
 
         Report report = new Report(selfIntro, reporter, reason);
         reportRepository.save(report);
@@ -241,21 +252,25 @@ public class SelfIntroService {
     }
 
     // 신고된 게시글 조회(5회 이상 신고된 게시글)
+
     public List<ReportedDto> getReportedSelfIntroductions() {
-        List<SelfIntro> reportedSelfIntros = selfIntroRepository.findByReportCountGreaterThanEqual(5);
-        return reportedSelfIntros.stream()
-                .flatMap(selfIntro -> selfIntro.getReports().stream()
-                        .map(report -> new ReportedDto(
-                                selfIntro.getId(),
-                                selfIntro.getTitle(),
-                                selfIntro.getUser().getEmail(),
-                                selfIntro.getUser().getName(),
-                                report.getReporter().getEmail(),
-                                report.getReporter().getName(),
-                                report.getReason()
-                        ))
-                )
-                .collect(Collectors.toList());
+        List<SelfIntro> reportedSelfIntros = selfIntroRepository.findByReportCountGreaterThanEqual(2);
+        Set<ReportedDto> uniqueReports = new HashSet<>();
+
+        reportedSelfIntros.forEach(selfIntro -> selfIntro.getReports().forEach(report -> {
+            ReportedDto reportedDto = new ReportedDto(
+                    selfIntro.getId(),
+                    selfIntro.getTitle(),
+                    selfIntro.getUser().getEmail(),
+                    selfIntro.getUser().getName(),
+                    report.getReporter().getEmail(),
+                    report.getReporter().getName(),
+                    report.getReason()
+            );
+            uniqueReports.add(reportedDto);
+        }));
+
+        return new ArrayList<>(uniqueReports);
     }
 
 
